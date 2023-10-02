@@ -23,9 +23,14 @@ public:
 
     void setVertices(float side_length);
     glm::vec3* getVertices();
-    void displayVertices();
+    void printVertices();
+    
     void rotate(); // rotaciona a peça no sentido anti-horário
     void translate(float x, float y);
+
+    void displayColor(float colors[4][3]);
+
+    bool isSelected(float x, float y);
 };
 
-#endif
+#endif // PIECE_H
