@@ -33,7 +33,7 @@ void inicio()
     glClearColor(1.0, 1.0, 1.0, 1.0); //indica qual cor sera usada para limpar o frame buffer (normalmente usa uma cor de background)
 }
 
-void keyboard(unsigned char key, int x, int y)
+void keyboardAscii(unsigned char key, int x, int y)
 {
     switch(key)
     {
@@ -44,29 +44,42 @@ void keyboard(unsigned char key, int x, int y)
             s.printVertices();
         break;
 
-        case 't':
-        case 'T':
-            s.printVertices();
-            s.translate(2,2);
-            s.printVertices();
-        break;
         default:
         break;
     }
     glutPostRedisplay();
 }
 
-void mouse(int button, int state, int x, int y)
+// Função que comanda o CLIQUE do mouse
+void mouseClick(int button, int state, int x, int y)
 {
-    if(button == GLUT_LEFT_BUTTON and state == GLUT_UP)
+    glm::vec3 world_coords = windowToWorldCoordinates(x,y);
+    float x_world = world_coords[0];
+    float y_world = world_coords[1];
+    
+    if (button == GLUT_LEFT_BUTTON and state == GLUT_DOWN)
     {
-        std::cout << x << ", " << y << std::endl;
-        std::cout << glm::to_string(windowToWorldCoordinates(x,y)) << std::endl;
+        std::cout << s.handleSelection(x_world,y_world) << std::endl;
+        std::cout << s.isSelected() << std::endl;
     }
+    if (button == GLUT_RIGHT_BUTTON and state == GLUT_UP)
+    {
+        if (s.handleSelection(x_world, y_world)) s.rotate();
+        std::cout << s.isSelected() << std::endl;
+    }
+    glutPostRedisplay();
 }
 
-//função que sera usada para desenhar o conteudo no Frame Buffer
-void desenha()
+// Função que comanda o ARRASTO do mouse
+void mouseDrag(int x, int y)
+{
+    glm::vec3 world_coords = windowToWorldCoordinates(x,y);
+    float x_world = world_coords[0];
+    float y_world = world_coords[1];
+}
+
+//função que desenha no frame buffer
+void display()
 {
     glClear(GL_COLOR_BUFFER_BIT); //sempre antes de desenhar qualquer coisa, deve-se limpar o Frame Buffer 
     glMatrixMode(GL_PROJECTION);
@@ -88,9 +101,10 @@ int main(int argc, char** argv)
 
     inicio();
  
-    glutDisplayFunc(desenha);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
-    glutKeyboardFunc(keyboard); // tratamento do teclado
-    glutMouseFunc(mouse);       // tratamento do mouse
+    glutDisplayFunc(display);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
+    glutKeyboardFunc(keyboardAscii); // tratamento do teclado
+    glutMouseFunc(mouseClick);       // tratamento do mouse
+    glutMotionFunc(mouseDrag);
 
     glutMainLoop();
 

@@ -3,7 +3,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <GL/gl.h>
+
 #include <iostream>
+#include <cstdlib>
 
 #include "utils.h"
 #include "piece.h"
@@ -22,10 +24,22 @@ void Piece::setVertices(float side_length)
 Piece::Piece()
 {
     this->setVertices(1.0f);
+    selected = false;
 }
 Piece::Piece(float side_length)
 {
     this->setVertices(side_length);
+    selected = false;
+}
+
+bool Piece::isSelected()
+{
+    return selected;
+}
+
+glm::vec3 Piece::getCenter()
+{
+    return this->center;
 }
 
 glm::vec3* Piece::getVertices()
@@ -77,12 +91,38 @@ void Piece::displayColor(float colors[4][3])
 
 // TODO: Implementar outro método de display só que com textura 
 
-bool Piece::isSelected(float x, float y)
+// TODO: Essa função não funciona para todos os casos, usar o método da projeção ortogonal
+bool Piece::handleSelection(float x, float y)
 {
-    float x_min = this->vr[0][0];
-    float x_max = this->vr[1][0];
-    float y_min = this->vr[0][1];
-    float y_max = this->vr[3][1];
+    /* O método é baseado na seguinte fórmula, que quando satisfeita para um ponto M,
+     * define M como interno ao quadrado/retângulo 
+     * (0 < AM⋅AB < AB⋅AB) e (0 < AM⋅AC < AC⋅AC)
+     * 
+     * Considere um quadrado/retângulo no formato abaixo para a fórmula acima.
+     * A---B
+     * |   |
+     * C---D
+     *
+    */
     
-    return (x>x_min) and (x<x_max) and (y>y_min) and (y<y_max);
+    glm::vec3 m = glm::vec3(x, y, 1.0f);
+
+    glm::vec3 a = this->vr[0]; 
+    glm::vec3 b = this->vr[1];
+    glm::vec3 c = this->vr[3];
+
+    glm::vec3 am = m-a;
+    glm::vec3 ab = b-a;
+    glm::vec3 ac = c-a;
+
+    float sizeof_proj_am_ab = glm::dot(am, ab);
+    float sizeof_proj_am_ac = glm::dot(am, ac);
+    float mod_ab = glm::dot(ab, ab);
+    float mod_ac = glm::dot(ac, ac);
+
+    return this->selected =
+        (sizeof_proj_am_ab > 0)      and
+        (sizeof_proj_am_ab < mod_ab) and
+        (sizeof_proj_am_ac > 0)      and
+        (sizeof_proj_am_ac < mod_ac);
 }
