@@ -1,10 +1,16 @@
 #include <GL/glut.h>
+#include <glm/glm.hpp>
 #include "piece.h"
 #include "piece.cpp"
 
 #include "config.h"
 
-Piece s = Piece(20);
+#include <cstdlib>
+#include <ctime>
+
+Piece pieces[3];
+glm::vec2 selected_coords;
+int selected_piece = -1;
 
 float colors[4][3] = {
     {0.0f, 1.0f, 0.0f},
@@ -13,7 +19,7 @@ float colors[4][3] = {
     {0.0f, 1.0f, 1.0f}
 };
 
-glm::vec3 windowToWorldCoordinates(int x_window, int y_window)
+glm::vec2 windowToWorldCoordinates(int x_window, int y_window)
 {
     y_window = window_h - y_window;
 
@@ -25,56 +31,90 @@ glm::vec3 windowToWorldCoordinates(int x_window, int y_window)
     float world_width = world_xmax - world_xmin;
     float x_world = world_xmin + x_norm*world_width;
 
-    return glm::vec3(x_world, y_world, 1.0f);
+    return glm::vec2(x_world, y_world);
 }
 
-void inicio()
+void gameStart()
+{
+    for(int i=0; i<3; i++)
+    {
+        pieces[i] = Piece(piece_edge_length);
+    }
+
+    pieces[0].translate(2,2);
+    pieces[1].translate(8,8);
+    pieces[2].translate(-3,-2);
+}
+
+void openglStart()
 {
     glClearColor(1.0, 1.0, 1.0, 1.0); //indica qual cor sera usada para limpar o frame buffer (normalmente usa uma cor de background)
 }
 
-void keyboard(unsigned char key, int x, int y)
+// Função que comanda o CLIQUE do mouse
+void mouseClick(int button, int state, int x, int y)
 {
-    switch(key)
+    glm::vec2 world_coords = windowToWorldCoordinates(x,y);
+    float x_world = world_coords[0];
+    float y_world = world_coords[1];
+    
+    if (button == GLUT_LEFT_BUTTON)
     {
-        case 'r':
-        case 'R':
-            s.printVertices();
-            s.rotate();
-            s.printVertices();
-        break;
-
-        case 't':
-        case 'T':
-            s.printVertices();
-            s.translate(2,2);
-            s.printVertices();
-        break;
-        default:
-        break;
+        if (state == GLUT_DOWN)
+        {
+            for(int i=0; i<3; i++)
+            {
+                if(pieces[i].handleSelection(x_world, y_world))
+                {
+                    selected_coords = world_coords;
+                    selected_piece = i;
+                    break;
+                }
+            }
+        }
+        else selected_piece = -1;
+    }
+    else if (button == GLUT_RIGHT_BUTTON and state == GLUT_UP)
+    {
+        for(int i=0; i<3; i++)
+        {
+            if (pieces[i].handleSelection(x_world, y_world))
+            {
+                pieces[i].rotate();
+                break;
+            }
+        }
     }
     glutPostRedisplay();
 }
 
-void mouse(int button, int state, int x, int y)
+// Função que comanda o ARRASTO do mouse
+void mouseDrag(int x, int y)
 {
-    if(button == GLUT_LEFT_BUTTON and state == GLUT_UP)
+    if(selected_piece >= 0)
     {
-        std::cout << x << ", " << y << std::endl;
-        std::cout << glm::to_string(windowToWorldCoordinates(x,y)) << std::endl;
+        glm::vec2 world_coords = windowToWorldCoordinates(x,y);
+        
+        glm::vec2 trans_vector = world_coords - selected_coords;
+        
+        pieces[selected_piece].translate(trans_vector[0], trans_vector[1]);
+        selected_coords = world_coords;
     }
+    glutPostRedisplay();
 }
 
-//função que sera usada para desenhar o conteudo no Frame Buffer
-void desenha()
+//função que desenha no frame buffer
+void display()
 {
     glClear(GL_COLOR_BUFFER_BIT); //sempre antes de desenhar qualquer coisa, deve-se limpar o Frame Buffer 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(world_xmin, world_xmax, world_ymin, world_ymax, -2, 2);
 
-    s.displayColor(colors);
-
+    for(int i=0; i<3; i++)
+    {
+        pieces[i].displayColor(colors);
+    }
     glFlush();  // Todas as instruções anteriores apenas indicaram o que deve ser feito. Essa é a ordem pra GPU redesenhar com as informações enviadas
 }
 
@@ -86,11 +126,13 @@ int main(int argc, char** argv)
     glutInitWindowSize(window_w,window_h);        //resolução da janela (framebuffer)
     glutCreateWindow("Puzzle");                   //cria a janela (a string aparece na barra de titulo da janela)
 
-    inicio();
- 
-    glutDisplayFunc(desenha);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
-    glutKeyboardFunc(keyboard); // tratamento do teclado
-    glutMouseFunc(mouse);       // tratamento do mouse
+    openglStart();
+    gameStart();
+
+    glutDisplayFunc(display);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
+    // glutKeyboardFunc(keyboardAscii); // tratamento do teclado
+    glutMouseFunc(mouseClick);       // tratamento do mouse
+    glutMotionFunc(mouseDrag);
 
     glutMainLoop();
 

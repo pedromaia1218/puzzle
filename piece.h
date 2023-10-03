@@ -16,12 +16,16 @@ class Piece{
 private:
     glm::vec3 vr[4];  // vértices da peça quadrada
     glm::vec3 center;
+    float l; // tamanho do lado do quadrado
+    bool selected;
 
 public:
     Piece();
     Piece(float side_length);
 
-    void setVertices(float side_length);
+    bool isSelected();
+    glm::vec3 getCenter();
+    void setVertices();
     glm::vec3* getVertices();
     void printVertices();
     
@@ -30,7 +34,7 @@ public:
 
     void displayColor(float colors[4][3]);
 
-    bool isSelected(float x, float y);
+    bool handleSelection(float x, float y);
 };
 
 #endif // PIECE_H
