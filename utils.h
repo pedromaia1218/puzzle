@@ -32,4 +32,17 @@ glm::mat3 translation2D(float x, float y)
     return T;
 }
 
+// matriz de escala 2D
+// x  0  0
+// 0  y  0
+// 0  0  1
+glm::mat3 scale2D(float x, float y)
+{
+    glm::mat3 S = I;
+    S[0][0] = x;
+    S[1][1] = y;
+
+    return S;
+}
+
 #endif // UTILS_H

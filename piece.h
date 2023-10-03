@@ -16,6 +16,7 @@ class Piece{
 private:
     glm::vec3 vr[4];  // vértices da peça quadrada
     glm::vec3 center;
+    float l; // tamanho do lado do quadrado
     bool selected;
 
 public:
@@ -24,7 +25,7 @@ public:
 
     bool isSelected();
     glm::vec3 getCenter();
-    void setVertices(float side_length);
+    void setVertices();
     glm::vec3* getVertices();
     void printVertices();
     

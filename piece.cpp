@@ -9,26 +9,36 @@
 
 #include "utils.h"
 #include "piece.h"
+#include "config.h"
 
-void Piece::setVertices(float side_length)
+void Piece::setVertices()
 {
-    float half_length = side_length/2.0f;
-    this->vr[0] = glm::vec3(-half_length, half_length, 1.0f);
-    this->vr[1] = glm::vec3( half_length, half_length, 1.0f);
-    this->vr[2] = glm::vec3( half_length,-half_length, 1.0f);
-    this->vr[3] = glm::vec3(-half_length,-half_length, 1.0f);
+    this->vr[0] = glm::vec3(-0.5f, 0.5f, 1.0f);
+    this->vr[1] = glm::vec3( 0.5f, 0.5f, 1.0f);
+    this->vr[2] = glm::vec3( 0.5f,-0.5f, 1.0f);
+    this->vr[3] = glm::vec3(-0.5f,-0.5f, 1.0f);
 
     this->center = glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
 Piece::Piece()
 {
-    this->setVertices(1.0f);
+    this->setVertices();
+    this->l = 1;
     selected = false;
 }
-Piece::Piece(float side_length)
+Piece::Piece(float edge_length)
 {
-    this->setVertices(side_length);
+    this->setVertices();
+
+    glm::mat3 S = scale2D(edge_length, edge_length);
+
+    for(int i=0; i<4; i++)
+    {
+        this->vr[i] = S * this->vr[i];
+    }
+
+    this->l = edge_length;
     selected = false;
 }
 
@@ -69,6 +79,15 @@ void Piece::rotate()
 }
 void Piece::translate(float x, float y)
 {
+    // condicional para evitar que a peça passe dos limites do tabuleiro
+    
+    float half_l = (this->l)/2;
+
+    if(center[0]+half_l + x > world_xmax) x = world_xmax-half_l - center[0];
+    if(center[0]-half_l + x < world_xmin) x = world_xmin+half_l - center[0];
+    if(center[1]+half_l + y > world_ymax) y = world_ymax-half_l - center[1];
+    if(center[1]-half_l + y < world_ymin) y = world_ymin+half_l - center[1];
+
     glm::mat3 T = translation2D(x,y);
 
     for(int i=0; i<4; i++)
@@ -91,7 +110,6 @@ void Piece::displayColor(float colors[4][3])
 
 // TODO: Implementar outro método de display só que com textura 
 
-// TODO: Essa função não funciona para todos os casos, usar o método da projeção ortogonal
 bool Piece::handleSelection(float x, float y)
 {
     /* O método é baseado na seguinte fórmula, que quando satisfeita para um ponto M,

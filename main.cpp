@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-Piece s = Piece(20);
+Piece s = Piece(piece_edge_length);
 
 float colors[4][3] = {
     {0.0f, 1.0f, 0.0f},
@@ -28,13 +28,15 @@ glm::vec3 windowToWorldCoordinates(int x_window, int y_window)
     return glm::vec3(x_world, y_world, 1.0f);
 }
 
-void inicio()
+void start()
 {
     glClearColor(1.0, 1.0, 1.0, 1.0); //indica qual cor sera usada para limpar o frame buffer (normalmente usa uma cor de background)
 }
 
 void keyboardAscii(unsigned char key, int x, int y)
 {
+    float trn = 1.9;
+    std::cout << s.l << std::endl;
     switch(key)
     {
         case 'r':
@@ -43,7 +45,32 @@ void keyboardAscii(unsigned char key, int x, int y)
             s.rotate();
             s.printVertices();
         break;
-
+        case 't':
+            s.printVertices();
+            s.translate(20,20);
+            s.printVertices();
+        break;
+        case 'w':
+            s.printVertices();
+            s.translate(0,trn);
+            s.printVertices();
+        break;
+        case 'a':
+            s.printVertices();
+            s.translate(-trn,0);
+            s.printVertices();
+        break;
+        case 's':
+            s.printVertices();
+            s.translate(0,-trn);
+            s.printVertices();
+        break;
+        case 'd':
+            s.printVertices();
+            s.translate(trn,0);
+            s.printVertices();
+        break;
+            
         default:
         break;
     }
@@ -99,7 +126,7 @@ int main(int argc, char** argv)
     glutInitWindowSize(window_w,window_h);        //resolução da janela (framebuffer)
     glutCreateWindow("Puzzle");                   //cria a janela (a string aparece na barra de titulo da janela)
 
-    inicio();
+    start();
  
     glutDisplayFunc(display);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
     glutKeyboardFunc(keyboardAscii); // tratamento do teclado
