@@ -2,15 +2,19 @@
 #include <glm/glm.hpp>
 #include "piece.h"
 #include "piece.cpp"
+#include <vector>
 
 #include "config.h"
 
 #include <cstdlib>
 #include <ctime>
 
+// std::vector<Piece> pieces; // lista contendo todas as peças do jogo
 Piece pieces[3];
+std::vector<int> priority_order; // lista que define a ordem de prioridade da peça a ser selecionada
+int selected_piece = -1; // variável que indica qual peça está selecionada (-1 quando nenhuma)
+
 glm::vec2 selected_coords;
-int selected_piece = -1;
 
 float colors[4][3] = {
     {0.0f, 1.0f, 0.0f},
@@ -32,6 +36,12 @@ glm::vec2 windowToWorldCoordinates(int x_window, int y_window)
     float x_world = world_xmin + x_norm*world_width;
 
     return glm::vec2(x_world, y_world);
+}
+
+// TODO: função que move todas as peças para lugares aleatórios do tabuleiro e as rotaciona
+void shuffle_pieces()
+{
+    // std::rand
 }
 
 void gameStart()
@@ -94,7 +104,6 @@ void mouseDrag(int x, int y)
     if(selected_piece >= 0)
     {
         glm::vec2 world_coords = windowToWorldCoordinates(x,y);
-        
         glm::vec2 trans_vector = world_coords - selected_coords;
         
         pieces[selected_piece].translate(trans_vector[0], trans_vector[1]);

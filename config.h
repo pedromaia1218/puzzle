@@ -17,6 +17,8 @@ float world_ymax =  20.0f;
 
 // define o tamanho do lado da peça quadrada
 float piece_edge_length = 4.0f;
+// define o tamanho da grade de quadrados (se for 4, será uma grade de 4x4, etc)
+unsigned sizeof_square_grid = 4;
 
 // define a distância necessária para a peça encaixar automaticamente
 float auto_fit_distance = 1.0f;

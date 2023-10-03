@@ -25,7 +25,6 @@ Piece::Piece()
 {
     this->setVertices();
     this->l = 1;
-    selected = false;
 }
 Piece::Piece(float edge_length)
 {
@@ -39,12 +38,6 @@ Piece::Piece(float edge_length)
     }
 
     this->l = edge_length;
-    selected = false;
-}
-
-bool Piece::isSelected()
-{
-    return selected;
 }
 
 glm::vec3 Piece::getCenter()
@@ -76,6 +69,8 @@ void Piece::rotate()
     { 
         this->vr[i] = local_rotate * this->vr[i];
     }
+    this->rotated = (this->rotated+1) % 4;
+    std::cout << this->rotated << std::endl;
 }
 void Piece::translate(float x, float y)
 {
@@ -138,9 +133,19 @@ bool Piece::handleSelection(float x, float y)
     float mod_ab = glm::dot(ab, ab);
     float mod_ac = glm::dot(ac, ac);
 
-    return this->selected =
-        (sizeof_proj_am_ab > 0)      and
-        (sizeof_proj_am_ab < mod_ab) and
-        (sizeof_proj_am_ac > 0)      and
-        (sizeof_proj_am_ac < mod_ac);
+    return  (sizeof_proj_am_ab > 0)      and
+            (sizeof_proj_am_ab < mod_ab) and
+            (sizeof_proj_am_ac > 0)      and
+            (sizeof_proj_am_ac < mod_ac);
+}
+
+bool Piece::handleFitting()
+{
+    glm::vec2 center2d = this->center;
+    glm::vec2 center_fitspot = center2d-this->fit_spot;
+
+    float distance_center_fitspot = glm::dot(center_fitspot, center_fitspot);
+    
+    return this->fit =  (distance_center_fitspot <= auto_fit_distance) and
+                        (this->rotated == 0);
 }

@@ -16,14 +16,15 @@ class Piece{
 private:
     glm::vec3 vr[4];  // vértices da peça quadrada
     glm::vec3 center;
+    glm::vec2 fit_spot; // posição em que o centro da peça se encaixa
     float l; // tamanho do lado do quadrado
-    bool selected;
+    int rotated; // flag que indica quantas vezes a peça foi rotacionada
+    bool fit; // flag que indica se a peça já foi encaixada
 
 public:
     Piece();
     Piece(float side_length);
 
-    bool isSelected();
     glm::vec3 getCenter();
     void setVertices();
     glm::vec3* getVertices();
@@ -35,6 +36,7 @@ public:
     void displayColor(float colors[4][3]);
 
     bool handleSelection(float x, float y);
+    bool handleFitting();
 };
 
 #endif // PIECE_H
