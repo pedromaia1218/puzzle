@@ -18,4 +18,7 @@ float world_ymax =  20.0f;
 // define o tamanho do lado da peça quadrada
 float piece_edge_length = 4.0f;
 
+// define a distância necessária para a peça encaixar automaticamente
+float auto_fit_distance = 1.0f;
+
 #endif // CONFIG_H

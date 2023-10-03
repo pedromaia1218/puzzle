@@ -1,10 +1,16 @@
 #include <GL/glut.h>
+#include <glm/glm.hpp>
 #include "piece.h"
 #include "piece.cpp"
 
 #include "config.h"
 
-Piece s = Piece(piece_edge_length);
+#include <cstdlib>
+#include <ctime>
+
+Piece pieces[3];
+glm::vec2 selected_coords;
+int selected_piece = -1;
 
 float colors[4][3] = {
     {0.0f, 1.0f, 0.0f},
@@ -13,7 +19,7 @@ float colors[4][3] = {
     {0.0f, 1.0f, 1.0f}
 };
 
-glm::vec3 windowToWorldCoordinates(int x_window, int y_window)
+glm::vec2 windowToWorldCoordinates(int x_window, int y_window)
 {
     y_window = window_h - y_window;
 
@@ -25,74 +31,59 @@ glm::vec3 windowToWorldCoordinates(int x_window, int y_window)
     float world_width = world_xmax - world_xmin;
     float x_world = world_xmin + x_norm*world_width;
 
-    return glm::vec3(x_world, y_world, 1.0f);
+    return glm::vec2(x_world, y_world);
 }
 
-void start()
+void gameStart()
+{
+    for(int i=0; i<3; i++)
+    {
+        pieces[i] = Piece(piece_edge_length);
+    }
+
+    pieces[0].translate(2,2);
+    pieces[1].translate(8,8);
+    pieces[2].translate(-3,-2);
+}
+
+void openglStart()
 {
     glClearColor(1.0, 1.0, 1.0, 1.0); //indica qual cor sera usada para limpar o frame buffer (normalmente usa uma cor de background)
-}
-
-void keyboardAscii(unsigned char key, int x, int y)
-{
-    float trn = 1.9;
-    std::cout << s.l << std::endl;
-    switch(key)
-    {
-        case 'r':
-        case 'R':
-            s.printVertices();
-            s.rotate();
-            s.printVertices();
-        break;
-        case 't':
-            s.printVertices();
-            s.translate(20,20);
-            s.printVertices();
-        break;
-        case 'w':
-            s.printVertices();
-            s.translate(0,trn);
-            s.printVertices();
-        break;
-        case 'a':
-            s.printVertices();
-            s.translate(-trn,0);
-            s.printVertices();
-        break;
-        case 's':
-            s.printVertices();
-            s.translate(0,-trn);
-            s.printVertices();
-        break;
-        case 'd':
-            s.printVertices();
-            s.translate(trn,0);
-            s.printVertices();
-        break;
-            
-        default:
-        break;
-    }
-    glutPostRedisplay();
 }
 
 // Função que comanda o CLIQUE do mouse
 void mouseClick(int button, int state, int x, int y)
 {
-    glm::vec3 world_coords = windowToWorldCoordinates(x,y);
+    glm::vec2 world_coords = windowToWorldCoordinates(x,y);
     float x_world = world_coords[0];
     float y_world = world_coords[1];
     
-    if (button == GLUT_LEFT_BUTTON and state == GLUT_DOWN)
+    if (button == GLUT_LEFT_BUTTON)
     {
-        std::cout << s.handleSelection(x_world,y_world) << std::endl;
-        std::cout << s.isSelected() << std::endl;
+        if (state == GLUT_DOWN)
+        {
+            for(int i=0; i<3; i++)
+            {
+                if(pieces[i].handleSelection(x_world, y_world))
+                {
+                    selected_coords = world_coords;
+                    selected_piece = i;
+                    break;
+                }
+            }
+        }
+        else selected_piece = -1;
     }
-    if (button == GLUT_RIGHT_BUTTON and state == GLUT_UP)
+    else if (button == GLUT_RIGHT_BUTTON and state == GLUT_UP)
     {
-        if (s.handleSelection(x_world, y_world)) s.rotate();
-        std::cout << s.isSelected() << std::endl;
+        for(int i=0; i<3; i++)
+        {
+            if (pieces[i].handleSelection(x_world, y_world))
+            {
+                pieces[i].rotate();
+                break;
+            }
+        }
     }
     glutPostRedisplay();
 }
@@ -100,9 +91,16 @@ void mouseClick(int button, int state, int x, int y)
 // Função que comanda o ARRASTO do mouse
 void mouseDrag(int x, int y)
 {
-    glm::vec3 world_coords = windowToWorldCoordinates(x,y);
-    float x_world = world_coords[0];
-    float y_world = world_coords[1];
+    if(selected_piece >= 0)
+    {
+        glm::vec2 world_coords = windowToWorldCoordinates(x,y);
+        
+        glm::vec2 trans_vector = world_coords - selected_coords;
+        
+        pieces[selected_piece].translate(trans_vector[0], trans_vector[1]);
+        selected_coords = world_coords;
+    }
+    glutPostRedisplay();
 }
 
 //função que desenha no frame buffer
@@ -113,8 +111,10 @@ void display()
     glLoadIdentity();
     glOrtho(world_xmin, world_xmax, world_ymin, world_ymax, -2, 2);
 
-    s.displayColor(colors);
-
+    for(int i=0; i<3; i++)
+    {
+        pieces[i].displayColor(colors);
+    }
     glFlush();  // Todas as instruções anteriores apenas indicaram o que deve ser feito. Essa é a ordem pra GPU redesenhar com as informações enviadas
 }
 
@@ -126,10 +126,11 @@ int main(int argc, char** argv)
     glutInitWindowSize(window_w,window_h);        //resolução da janela (framebuffer)
     glutCreateWindow("Puzzle");                   //cria a janela (a string aparece na barra de titulo da janela)
 
-    start();
- 
+    openglStart();
+    gameStart();
+
     glutDisplayFunc(display);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
-    glutKeyboardFunc(keyboardAscii); // tratamento do teclado
+    // glutKeyboardFunc(keyboardAscii); // tratamento do teclado
     glutMouseFunc(mouseClick);       // tratamento do mouse
     glutMotionFunc(mouseDrag);
 
