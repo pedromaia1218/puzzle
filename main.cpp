@@ -9,8 +9,9 @@
 #include <cstdlib>
 #include <ctime>
 
-// std::vector<Piece> pieces; // lista contendo todas as peças do jogo
-Piece pieces[3];
+std::vector<Piece> pieces; // lista contendo todas as peças do jogo
+// acessar: pieces.at();
+
 std::vector<int> priority_order; // lista que define a ordem de prioridade da peça a ser selecionada
 int selected_piece = -1; // variável que indica qual peça está selecionada (-1 quando nenhuma)
 glm::vec2 selected_coords; // variável que marca as coordenadas de mundo atualmente selecionadas
@@ -39,14 +40,11 @@ void shuffle_pieces()
 
 void gameStart()
 {
-    for(int i=0; i<3; i++)
+    for(int i=0; i<sizeof_square_grid*sizeof_square_grid; i++)
     {
-        pieces[i] = Piece(piece_edge_length, glm::vec2(10,-10));
+        pieces.push_back(Piece(piece_edge_length, glm::vec2(10,-10)));
+        priority_order.push_back(i);
     }
-
-    pieces[0].translate(2,2);
-    pieces[1].translate(8,8);
-    pieces[2].translate(-3,-2);
 }
 
 void openglStart()
@@ -65,12 +63,18 @@ void mouseClick(int button, int state, int x, int y)
     {
         if (state == GLUT_DOWN)
         {
-            for(int i=0; i<3; i++)
+            for(int i=priority_order.size()-1; i>=0; i--)
             {
-                if(pieces[i].handleSelection(x_world, y_world))
+                if(pieces.at(priority_order[i]).handleSelection(x_world, y_world))
                 {
+                    int p = priority_order[i];
+                    priority_order.erase(priority_order.begin() + i);
                     selected_coords = world_coords;
-                    selected_piece = i;
+                    selected_piece = p;
+                    priority_order.push_back(p);
+                    std::cout << "a" << std::endl;
+                    for (auto x: priority_order)
+                        std::cout << x << " ";
                     break;
                 }
             }
@@ -84,17 +88,18 @@ void mouseClick(int button, int state, int x, int y)
                 pieces[selected_piece].handleFitting();
                 
                 // desseleciona a peça
-                selected_piece = -1;   
+                selected_piece = -1;
+
             }
         }
     }
     else if (button == GLUT_RIGHT_BUTTON and state == GLUT_UP)
     {
-        for(int i=0; i<3; i++)
+        for(int i : priority_order)
         {
-            if (pieces[i].handleSelection(x_world, y_world))
+            if (pieces.at(i).handleSelection(x_world, y_world))
             {
-                pieces[i].rotate();
+                pieces.at(i).rotate();
                 break;
             }
         }
@@ -110,7 +115,7 @@ void mouseDrag(int x, int y)
         glm::vec2 world_coords = windowToWorldCoordinates(x,y);
         glm::vec2 trans_vector = world_coords - selected_coords;
         
-        pieces[selected_piece].translate(trans_vector[0], trans_vector[1]);
+        pieces.at(selected_piece).translate(trans_vector[0], trans_vector[1]);
         selected_coords = world_coords;
     }
     glutPostRedisplay();
@@ -132,10 +137,11 @@ void display()
         {0.0f, 1.0f, 1.0f}
     };
 
-    for(int i=0; i<3; i++)
+    for(int i=0; i<priority_order.size(); i++)
     {
-        pieces[i].displayColor(colors);
+        pieces.at(priority_order.at(i)).displayColor(colors);
     }
+
     glColor3f(0,0,0);
     glPointSize(5);
     glBegin(GL_POINTS);
