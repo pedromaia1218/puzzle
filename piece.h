@@ -18,12 +18,13 @@ private:
     glm::vec3 center;
     glm::vec2 fit_spot; // posição em que o centro da peça se encaixa
     float l; // tamanho do lado do quadrado
-    int rotated; // flag que indica quantas vezes a peça foi rotacionada
-    bool fit; // flag que indica se a peça já foi encaixada
+    int rotated = 0; // flag que indica quantas vezes a peça foi rotacionada
+    bool fit = false; // flag que indica se a peça já foi encaixada
 
 public:
     Piece();
-    Piece(float side_length);
+    Piece(float edge_length);
+    Piece(float edge_length, glm::vec2 fit_spot);
 
     glm::vec3 getCenter();
     void setVertices();

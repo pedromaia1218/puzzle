@@ -13,15 +13,8 @@
 Piece pieces[3];
 std::vector<int> priority_order; // lista que define a ordem de prioridade da peça a ser selecionada
 int selected_piece = -1; // variável que indica qual peça está selecionada (-1 quando nenhuma)
+glm::vec2 selected_coords; // variável que marca as coordenadas de mundo atualmente selecionadas
 
-glm::vec2 selected_coords;
-
-float colors[4][3] = {
-    {0.0f, 1.0f, 0.0f},
-    {0.0f, 1.0f, 1.0f},
-    {0.0f, 0.0f, 1.0f},
-    {0.0f, 1.0f, 1.0f}
-};
 
 glm::vec2 windowToWorldCoordinates(int x_window, int y_window)
 {
@@ -48,7 +41,7 @@ void gameStart()
 {
     for(int i=0; i<3; i++)
     {
-        pieces[i] = Piece(piece_edge_length);
+        pieces[i] = Piece(piece_edge_length, glm::vec2(10,-10));
     }
 
     pieces[0].translate(2,2);
@@ -82,7 +75,18 @@ void mouseClick(int button, int state, int x, int y)
                 }
             }
         }
-        else selected_piece = -1;
+        else
+        {
+            if (selected_piece >= 0)
+            {
+                // se ao soltar o clique a peça estiver nas condições favoráveis,
+                // realizar encaixe automático
+                pieces[selected_piece].handleFitting();
+                
+                // desseleciona a peça
+                selected_piece = -1;   
+            }
+        }
     }
     else if (button == GLUT_RIGHT_BUTTON and state == GLUT_UP)
     {
@@ -120,10 +124,23 @@ void display()
     glLoadIdentity();
     glOrtho(world_xmin, world_xmax, world_ymin, world_ymax, -2, 2);
 
+
+    float colors[4][3] = {
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 1.0f}
+    };
+
     for(int i=0; i<3; i++)
     {
         pieces[i].displayColor(colors);
     }
+    glColor3f(0,0,0);
+    glPointSize(5);
+    glBegin(GL_POINTS);
+    glVertex2f(10, -10);
+    glEnd();
     glFlush();  // Todas as instruções anteriores apenas indicaram o que deve ser feito. Essa é a ordem pra GPU redesenhar com as informações enviadas
 }
 

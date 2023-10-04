@@ -39,6 +39,20 @@ Piece::Piece(float edge_length)
 
     this->l = edge_length;
 }
+Piece::Piece(float edge_length, glm::vec2 fit_spot)
+{
+    this->setVertices();
+
+    glm::mat3 S = scale2D(edge_length, edge_length);
+
+    for(int i=0; i<4; i++)
+    {
+        this->vr[i] = S * this->vr[i];
+    }
+
+    this->l = edge_length;
+    this->fit_spot = fit_spot;
+}
 
 glm::vec3 Piece::getCenter()
 {
@@ -142,10 +156,23 @@ bool Piece::handleSelection(float x, float y)
 bool Piece::handleFitting()
 {
     glm::vec2 center2d = this->center;
-    glm::vec2 center_fitspot = center2d-this->fit_spot;
+    glm::vec2 center_to_fitspot = this->fit_spot - center2d;
 
-    float distance_center_fitspot = glm::dot(center_fitspot, center_fitspot);
+    float distance_center_fitspot = std::sqrt(glm::dot(center_to_fitspot, center_to_fitspot));
+
+    std::cout << "center: " << glm::to_string(center2d) << std::endl;
+    std::cout << "fitspot: " << glm::to_string(this->fit_spot) << std::endl;
+    std::cout << "vector_c2f: " << glm::to_string(center_to_fitspot) << std::endl;
+    std::cout << "sizeof_vector: " << distance_center_fitspot << std::endl;
+    std::cout << "rotated: " << this->rotated << std::endl;
+    std::cout << "auto_fit_distance: " << auto_fit_distance << std::endl;
     
-    return this->fit =  (distance_center_fitspot <= auto_fit_distance) and
-                        (this->rotated == 0);
+    if (distance_center_fitspot <= auto_fit_distance and this->rotated == 0)
+    {
+        this->translate(center_to_fitspot[0], center_to_fitspot[1]);
+        std::cout << "BOOM" << std::endl;
+        return this->fit = true;
+    }
+
+    return false;
 }
