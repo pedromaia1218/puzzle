@@ -89,6 +89,7 @@ unsigned loadTexture(char *filepath)
     return tex_id; //retornando o identificador da textura (sem ele não há como acessar a textura carregada)
 }
 
+// Função que cria todas as peças
 void gameStart()
 {
     board_pos.x = world_xmin + world_w/2 + (world_h-board_size)/2;
@@ -106,12 +107,12 @@ void gameStart()
             fit_pos.y = board_pos.y+l*j + l/2;
 
             glm::vec2 tx_coords[4];
-            tx_coords[0] = glm::vec2((s-i-1)/s, j    /s);
-            tx_coords[1] = glm::vec2((s-i-1)/s, (j+1)/s);
-            tx_coords[2] = glm::vec2((s-i)  /s, (j+1)/s);
-            tx_coords[3] = glm::vec2((s-i)  /s, j    /s);
+            tx_coords[0] = glm::vec2((float)(i  )/s, (float)(j+1)/s);
+            tx_coords[1] = glm::vec2((float)(i+1)/s, (float)(j+1)/s);
+            tx_coords[2] = glm::vec2((float)(i+1)/s, (float)(j  )/s);
+            tx_coords[3] = glm::vec2((float)(i  )/s, (float)(j  )/s);
 
-            pieces.push_back(Piece(piece_edge_length, fit_pos, tx_coords));
+            pieces.push_back(Piece(l, fit_pos, tx_coords));
 
             int id = sizeof_square_grid*i + j;
             priority_order.push_back(id);
@@ -229,9 +230,7 @@ void display()
     glVertex2f(board_pos.x+board_size +k, board_pos.y+board_size +k);
 	glVertex2f(board_pos.x+board_size +k, board_pos.y            -k);
     glEnd();
-    glPopMatrix();
     
-    glPushMatrix();
     glColor3f(1,1,1); 
     glBegin(GL_QUADS);
     glVertex2f(board_pos.x           , board_pos.y           );
@@ -239,7 +238,20 @@ void display()
     glVertex2f(board_pos.x+board_size, board_pos.y+board_size);
 	glVertex2f(board_pos.x+board_size, board_pos.y           );
     glEnd();
-    glPopMatrix();
+
+    // glBindTexture(GL_TEXTURE_2D, texture); // DEBUG
+    // glBegin(GL_QUADS);
+    // glTexCoord2f(0,0);
+    // glVertex2f(board_pos.x           , board_pos.y           );
+    // glTexCoord2f(0,1);
+    // glVertex2f(board_pos.x           , board_pos.y+board_size);  
+    // glTexCoord2f(0.5,0.5);
+    // glVertex2f(board_pos.x+board_size, board_pos.y+board_size);
+    // glTexCoord2f(0.5,0);
+    // glVertex2f(board_pos.x+board_size, board_pos.y           );
+    // glEnd();
+    // glBindTexture(GL_TEXTURE_2D, 0);
+
 
     // float colors[4][3] = {
     //     {0.0f, 1.0f, 0.0f},
