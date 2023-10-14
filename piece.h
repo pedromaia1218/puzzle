@@ -14,7 +14,8 @@
 */
 class Piece{
 private:
-    glm::vec3 vr[4];  // vértices da peça quadrada
+    glm::vec3 vr[4];  // vértices da peça quadrada (vetores bidimensionais com coord. homogêneas)
+    glm::vec2 tx[4];  // coordenadas da textura da peça quadrada
     glm::vec3 center;
     glm::vec2 fit_spot; // posição em que o centro da peça se encaixa
     float l; // tamanho do lado do quadrado
@@ -24,7 +25,9 @@ private:
 public:
     Piece();
     Piece(float edge_length);
-    Piece(float edge_length, glm::vec2 fit_spot);
+    Piece(float edge_length, glm::vec2 fit_spot, glm::vec2 tx_coords[4]);
+
+    bool isFit();
 
     glm::vec3 getCenter();
     void setVertices();
@@ -35,6 +38,7 @@ public:
     void translate(float x, float y);
 
     void displayColor(float colors[4][3]);
+    void displayTexture();
 
     bool handleSelection(float x, float y);
     bool handleFitting();

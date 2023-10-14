@@ -11,6 +11,7 @@
 #include "piece.h"
 #include "config.h"
 
+// cria um quadrado centralizado na origem, de lado 1
 void Piece::setVertices()
 {
     this->vr[0] = glm::vec3(-0.5f, 0.5f, 1.0f);
@@ -39,12 +40,12 @@ Piece::Piece(float edge_length)
 
     this->l = edge_length;
 }
-Piece::Piece(float edge_length, glm::vec2 fit_spot)
+Piece::Piece(float edge_length, glm::vec2 fit_spot, glm::vec2 tx_coords[4])
 {
     this->setVertices();
-
     glm::mat3 S = scale2D(edge_length, edge_length);
 
+    // aplica a escala a todos os vértices
     for(int i=0; i<4; i++)
     {
         this->vr[i] = S * this->vr[i];
@@ -52,6 +53,17 @@ Piece::Piece(float edge_length, glm::vec2 fit_spot)
 
     this->l = edge_length;
     this->fit_spot = fit_spot;
+    
+    // atribui as coordenadas de textura a todos os vértices
+    for(int i=0; i<4; i++)
+    {
+        this->tx[i] = tx_coords[i];
+    }
+}
+
+bool Piece::isFit()
+{
+    return this->fit;
 }
 
 glm::vec3 Piece::getCenter()
@@ -106,7 +118,7 @@ void Piece::translate(float x, float y)
 
 void Piece::displayColor(float colors[4][3])
 {
-    glBegin(GL_TRIANGLE_FAN);
+    glBegin(GL_QUADS);
     for(int i=0; i<4; i++)
     {
         glColor3fv(colors[i]);
@@ -115,7 +127,16 @@ void Piece::displayColor(float colors[4][3])
     glEnd();
 }
 
-// TODO: Implementar outro método de display só que com textura 
+void Piece::displayTexture()
+{
+    glBegin(GL_QUADS);
+    for(int i=0; i<4; i++)
+    {
+    	glTexCoord2fv(glm::value_ptr(this->tx[i]));
+    	glVertex3fv(glm::value_ptr(this->vr[i]));
+    }
+    glEnd();
+}
 
 bool Piece::handleSelection(float x, float y)
 {
