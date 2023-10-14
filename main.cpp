@@ -96,7 +96,7 @@ void gameStart()
     board_pos.y = world_ymin + (world_h-board_size)/2;
 
     unsigned s = sizeof_square_grid;
-    unsigned l = piece_edge_length;
+    float l = piece_edge_length;
 
     for(int i=0; i<s; i++)
     {
@@ -238,20 +238,6 @@ void display()
     glVertex2f(board_pos.x+board_size, board_pos.y+board_size);
 	glVertex2f(board_pos.x+board_size, board_pos.y           );
     glEnd();
-
-    // glBindTexture(GL_TEXTURE_2D, texture); // DEBUG
-    // glBegin(GL_QUADS);
-    // glTexCoord2f(0,0);
-    // glVertex2f(board_pos.x           , board_pos.y           );
-    // glTexCoord2f(0,1);
-    // glVertex2f(board_pos.x           , board_pos.y+board_size);  
-    // glTexCoord2f(0.5,0.5);
-    // glVertex2f(board_pos.x+board_size, board_pos.y+board_size);
-    // glTexCoord2f(0.5,0);
-    // glVertex2f(board_pos.x+board_size, board_pos.y           );
-    // glEnd();
-    // glBindTexture(GL_TEXTURE_2D, 0);
-
 
     // float colors[4][3] = {
     //     {0.0f, 1.0f, 0.0f},
