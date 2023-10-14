@@ -11,6 +11,7 @@
 #include "piece.h"
 #include "config.h"
 
+// cria um quadrado centralizado na origem, de lado 1
 void Piece::setVertices()
 {
     this->vr[0] = glm::vec3(-0.5f, 0.5f, 1.0f);
@@ -25,7 +26,6 @@ Piece::Piece()
 {
     this->setVertices();
     this->l = 1;
-    selected = false;
 }
 Piece::Piece(float edge_length)
 {
@@ -39,12 +39,31 @@ Piece::Piece(float edge_length)
     }
 
     this->l = edge_length;
-    selected = false;
+}
+Piece::Piece(float edge_length, glm::vec2 fit_spot, glm::vec2 tx_coords[4])
+{
+    this->setVertices();
+    glm::mat3 S = scale2D(edge_length, edge_length);
+
+    // aplica a escala a todos os vértices
+    for(int i=0; i<4; i++)
+    {
+        this->vr[i] = S * this->vr[i];
+    }
+
+    this->l = edge_length;
+    this->fit_spot = fit_spot;
+    
+    // atribui as coordenadas de textura a todos os vértices
+    for(int i=0; i<4; i++)
+    {
+        this->tx[i] = tx_coords[i];
+    }
 }
 
-bool Piece::isSelected()
+bool Piece::isFit()
 {
-    return selected;
+    return this->fit;
 }
 
 glm::vec3 Piece::getCenter()
@@ -52,7 +71,7 @@ glm::vec3 Piece::getCenter()
     return this->center;
 }
 
-glm::vec3* Piece::getVertices()
+glm::vec3 *Piece::getVertices()
 {
     return this->vr;
 }
@@ -71,11 +90,11 @@ void Piece::rotate()
     
     glm::mat3 local_rotate = translate_back * rotate_on_origin * translate_to_origin;
 
-    std::cout << glm::to_string(local_rotate) << std::endl;
     for(int i=0; i<4; i++)
     { 
         this->vr[i] = local_rotate * this->vr[i];
     }
+    this->rotated = (this->rotated+1) % 4;
 }
 void Piece::translate(float x, float y)
 {
@@ -99,7 +118,7 @@ void Piece::translate(float x, float y)
 
 void Piece::displayColor(float colors[4][3])
 {
-    glBegin(GL_TRIANGLE_FAN);
+    glBegin(GL_QUADS);
     for(int i=0; i<4; i++)
     {
         glColor3fv(colors[i]);
@@ -108,7 +127,16 @@ void Piece::displayColor(float colors[4][3])
     glEnd();
 }
 
-// TODO: Implementar outro método de display só que com textura 
+void Piece::displayTexture()
+{
+    glBegin(GL_QUADS);
+    for(int i=0; i<4; i++)
+    {
+    	glTexCoord2fv(glm::value_ptr(this->tx[i]));
+    	glVertex3fv(glm::value_ptr(this->vr[i]));
+    }
+    glEnd();
+}
 
 bool Piece::handleSelection(float x, float y)
 {
@@ -138,9 +166,24 @@ bool Piece::handleSelection(float x, float y)
     float mod_ab = glm::dot(ab, ab);
     float mod_ac = glm::dot(ac, ac);
 
-    return this->selected =
-        (sizeof_proj_am_ab > 0)      and
-        (sizeof_proj_am_ab < mod_ab) and
-        (sizeof_proj_am_ac > 0)      and
-        (sizeof_proj_am_ac < mod_ac);
+    return  (sizeof_proj_am_ab > 0)      and
+            (sizeof_proj_am_ab < mod_ab) and
+            (sizeof_proj_am_ac > 0)      and
+            (sizeof_proj_am_ac < mod_ac);
+}
+
+bool Piece::handleFitting()
+{
+    glm::vec2 center2d = this->center;
+    glm::vec2 center_to_fitspot = this->fit_spot - center2d;
+
+    float distance_center_fitspot = std::sqrt(glm::dot(center_to_fitspot, center_to_fitspot));
+    
+    if (distance_center_fitspot <= auto_fit_distance and this->rotated == 0)
+    {
+        this->translate(center_to_fitspot[0], center_to_fitspot[1]);
+        return this->fit = true;
+    }
+
+    return false;
 }
