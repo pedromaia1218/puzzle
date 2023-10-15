@@ -22,11 +22,11 @@ float world_h = world_ymax-world_ymin;
 
 // configurações do tabuleiro
 
-unsigned sizeof_square_grid = 30; // tamanho da grade de quadrados (se for 4, será uma grade de 4x4, etc)
+unsigned sizeof_square_grid = 5; // tamanho da grade de quadrados (se for 4, será uma grade de 4x4, etc)
 
 float board_size = 30.0f; // tamanho do tabuleiro
 float piece_edge_length = board_size / sizeof_square_grid; // lado da peça quadrada
-float board_edge_thickness = 0.2; // espessura da borda do tabuleiro
+float board_edge_thickness = 0.4; // espessura da borda do tabuleiro
 
 // define a distância necessária para a peça encaixar automaticamente
 float auto_fit_distance = 3*piece_edge_length/4;
