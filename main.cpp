@@ -1,3 +1,19 @@
+/*
+ * Trabalho de Computação Gráfica
+ * Trabalho desenvolvido para a disciplina de Computação Gráfica,
+ * do curso de Ciência da Computação, na Universidade Federal do Ceará, Campus Russas.
+ * 
+ * O trabalho se trata de um puzzle (quebra-cabeça) de quadradinhos
+ * desenvolvido em C++ com o auxílio das bibliotecas openGL, glut e GLM.
+
+ * Equipe:
+
+    - Clayver Rodrigues de Morais, matrícula 494097
+    - Isaac Emanuel Costa de Andrade, matrícula 493661
+
+*/
+
+
 #include <GL/glut.h>
 #include <glm/glm.hpp>
 
@@ -40,7 +56,6 @@ glm::vec2 windowToWorldCoordinates(int x_window, int y_window)
     return glm::vec2(x_world, y_world);
 }
 
-// TODO: função que move todas as peças para lugares aleatórios do tabuleiro e as rotaciona
 void shuffle_pieces()
 {
     // configura a geração de números aleatórios
@@ -61,8 +76,8 @@ void shuffle_pieces()
 
         // rotaciona a peça aleatoriamente
         int random_r = rand_rotation(rng);
-        for (int i=0; i<random_r; i++)
-            pieces.at(i).rotate();
+        // for (int i=0; i<random_r; i++)
+        //     pieces.at(i).rotate();
     }
 }
 
