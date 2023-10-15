@@ -1,6 +1,4 @@
 # puzzle
-<<<<<<< Updated upstream
-=======
 
 Trabalho desenvolvido para a disciplina de Computação Gráfica do curso de Ciência da Computação, na Universidade Federal do Ceará, Campus Russas.
 
@@ -10,4 +8,4 @@ Equipe:
 
 - **Clayver Rodrigues de Morais**, matrícula **494097**
 - **Isaac Emanuel Costa de Andrade**, matrícula **493661**
->>>>>>> Stashed changes
+- 
