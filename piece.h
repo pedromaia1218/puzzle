@@ -26,9 +26,7 @@ public:
     Piece();
     Piece(float edge_length);
     Piece(float edge_length, glm::vec2 fit_spot, glm::vec2 tx_coords[4]);
-
-    bool isFit();
-
+    
     glm::vec3 getCenter();
     void setVertices();
     glm::vec3* getVertices();

@@ -5,6 +5,7 @@
 #include <ctime>
 
 #include <vector>
+#include <random>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -42,7 +43,27 @@ glm::vec2 windowToWorldCoordinates(int x_window, int y_window)
 // TODO: função que move todas as peças para lugares aleatórios do tabuleiro e as rotaciona
 void shuffle_pieces()
 {
+    // configura a geração de números aleatórios
+    std::random_device rd; // usado para inicializar o gerador de números
+    std::mt19937 rng(rd()); // usa a engine de Mersenne-Twister para gerar os números 
+    std::uniform_real_distribution<float> rand_range_x(world_xmin, world_xmin+world_w/2); // gerar os números seguindo uma distribuição uniforme (não enviesada)
+    std::uniform_real_distribution<float> rand_range_y(world_xmin, world_xmax);
+    std::uniform_int_distribution<int> rand_rotation(0,3);
 
+    for(auto i : priority_order)
+    {
+        std::cout << "asdasd" << std::endl;
+        // translada a peça para um lugar aleatório dentro do tabuleiro
+        float random_t_x = rand_range_x(rng);
+        float random_t_y = rand_range_y(rng);
+        glm::vec2 trans_vector = glm::vec3(random_t_x, random_t_y, 1) - pieces.at(i).getCenter();
+        pieces.at(i).translate(trans_vector.x, trans_vector.y);
+
+        // rotaciona a peça aleatoriamente
+        int random_r = rand_rotation(rng);
+        for (int i=0; i<random_r; i++)
+            pieces.at(i).rotate();
+    }
 }
 
 unsigned loadTexture(char *filepath)
@@ -185,11 +206,12 @@ void mouseClick(int button, int state, int x, int y)
     }
     else if (button == GLUT_RIGHT_BUTTON and state == GLUT_UP)
     {
-        for(int i : priority_order)
+        for(int i=priority_order.size()-1; i>=0; i--)
         {
-            if (pieces.at(i).handleSelection(x_world, y_world))
+            int p = priority_order.at(i);
+            if (pieces.at(p).handleSelection(x_world, y_world))
             {
-                pieces.at(i).rotate();
+                pieces.at(p).rotate();
                 break;
             }
         }
@@ -211,17 +233,9 @@ void mouseDrag(int x, int y)
     glutPostRedisplay();
 }
 
-//função que desenha no frame buffer
-void display()
+void displayBoard()
 {
-    glClear(GL_COLOR_BUFFER_BIT); //sempre antes de desenhar qualquer coisa, deve-se limpar o Frame Buffer 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(world_xmin, world_xmax, world_ymin, world_ymax, -2, 2);
-
-    // Desenha o tabuleiro:
-    // (um quadrado branco em cima de um quadrado preto levemente maior)
-    
+    // um quadrado branco em cima de um quadrado preto levemente maior
     float k = board_edge_thickness;
     glColor3f(0,0,0); 
     glBegin(GL_QUADS);
@@ -238,13 +252,18 @@ void display()
     glVertex2f(board_pos.x+board_size, board_pos.y+board_size);
 	glVertex2f(board_pos.x+board_size, board_pos.y           );
     glEnd();
+}
 
-    // float colors[4][3] = {
-    //     {0.0f, 1.0f, 0.0f},
-    //     {0.0f, 1.0f, 1.0f},
-    //     {0.0f, 0.0f, 1.0f},
-    //     {0.0f, 1.0f, 1.0f}
-    // };
+//função que desenha no frame buffer
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT); //sempre antes de desenhar qualquer coisa, deve-se limpar o Frame Buffer 
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(world_xmin, world_xmax, world_ymin, world_ymax, -2, 2);
+
+    // Desenha o tabuleiro:
+    displayBoard();
 
     // exibe as peças que já foram encaixadas
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -272,6 +291,7 @@ int main(int argc, char** argv)
 
     openglStart();
     gameStart();
+    shuffle_pieces();
 
     glutDisplayFunc(display);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
     glutReshapeFunc(windowResize); // tratamento do redimensionamento da janela
