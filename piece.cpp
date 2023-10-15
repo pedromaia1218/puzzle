@@ -79,7 +79,6 @@ void Piece::printVertices()
 
 void Piece::rotate()
 {
-    std::cout << "AAA" << std::endl;
     glm::mat3 translate_to_origin = translation2D(-this->center[0], -this->center[1]);
     glm::mat3 rotate_on_origin = rotation2D();
     glm::mat3 translate_back = translation2D(this->center[0], this->center[1]);
@@ -95,7 +94,6 @@ void Piece::rotate()
 void Piece::translate(float x, float y)
 {
     // condicional para evitar que a peça passe dos limites do tabuleiro
-    std::cout << "UUU" << std::endl;
     float half_l = (this->l)/2;
 
     if(center[0]+half_l + x > world_xmax) x = world_xmax-half_l - center[0];

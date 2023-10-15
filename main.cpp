@@ -67,7 +67,6 @@ void shuffle_pieces()
 
     for(auto i : priority_order)
     {
-        std::cout << "asdasd" << std::endl;
         // translada a peça para um lugar aleatório dentro do tabuleiro
         float random_t_x = rand_range_x(rng);
         float random_t_y = rand_range_y(rng);
@@ -76,8 +75,8 @@ void shuffle_pieces()
 
         // rotaciona a peça aleatoriamente
         int random_r = rand_rotation(rng);
-        // for (int i=0; i<random_r; i++)
-        //     pieces.at(i).rotate();
+        for (int i=0; i<random_r; i++)
+            pieces.at(i).rotate();
     }
 }
 
@@ -191,14 +190,6 @@ void mouseClick(int button, int state, int x, int y)
                     selected_coords = world_coords;
                     selected_piece = p;
                     priority_order.push_back(p);
-                    
-                    // for (auto x: priority_order) // DEBUGGING
-                    //     std::cout << x << " ";
-                    // std::cout << std::endl;
-
-                    // for (auto x: fit_pieces)
-                    //     std::cout << x << " ";
-                    // std::cout << "=-=-=-=-=" << std::endl;
                     break;
                 }
             }
@@ -298,20 +289,19 @@ void display()
 
 int main(int argc, char** argv)
 {
-    glutInit(&argc,argv);                         //inicializar a biblioteca GLUT
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);  //configuraçoes do frame buffer (um frame buffer com três canais de cor: RGB)
-    glutInitWindowPosition(200,200);              //posição do canto superior esquerdo da janela com relação a tela
-    glutInitWindowSize(window_w,window_h);        //resolução da janela (framebuffer)
-    glutCreateWindow("Puzzle");                   //cria a janela (a string aparece na barra de titulo da janela)
+    glutInit(&argc,argv);                         // inicializar a biblioteca GLUT
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);  // configuraçoes do frame buffer (um frame buffer com três canais de cor: RGB)
+    glutInitWindowPosition(200,200);              // posição do canto superior esquerdo da janela com relação a tela
+    glutInitWindowSize(window_w,window_h);        // resolução da janela (framebuffer)
+    glutCreateWindow("Puzzle");                   // cria a janela (a string aparece na barra de titulo da janela)
 
     openglStart();
     gameStart();
     shuffle_pieces();
 
-    glutDisplayFunc(display);   // indica pra GLUT que a função 'desenha' sera chamada para atualizar o frame buffer
+    glutDisplayFunc(display);
     glutReshapeFunc(windowResize); // tratamento do redimensionamento da janela
-    // glutKeyboardFunc(keyboardAscii); // tratamento do teclado
-    glutMouseFunc(mouseClick);       // tratamento do mouse
+    glutMouseFunc(mouseClick);     // tratamento do mouse
     glutMotionFunc(mouseDrag);
 
     glutMainLoop();
